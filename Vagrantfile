@@ -23,6 +23,7 @@ Vagrant.configure('2') do |config|
         # Install Ruby
         sudo apt-get install -y ruby ruby-dev build-essential libpq-dev git
         sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'
+        sudo gem update --system
         sudo gem install bundler
 
         # Deploy the app
