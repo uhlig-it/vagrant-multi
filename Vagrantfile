@@ -1,52 +1,51 @@
+ENTRY_POINT = '192.168.42.2'
+WEB_INSTANCE_COUNT = 2
+DBMS_ADDRESS = '192.168.42.30'
+DB_NAME = 'journaldb'
+DB_USER = 'journal-web'
+DB_PASSWORD = 'UmpBrgnyOCUOAq9B'
+DB_URL = "postgres://#{DB_USER}:#{DB_PASSWORD}@#{DBMS_ADDRESS}/#{DB_NAME}"
+
 Vagrant.configure('2') do |config|
   config.vm.box = 'debian/stretch64'
   config.vm.provision 'shell', inline: 'ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime'
 
   config.vm.define 'db' do |cfg|
     cfg.vm.hostname = 'db'
-    cfg.vm.network 'private_network', ip: '192.168.42.30'
-    cfg.vm.provision 'shell', inline: <<~SCRIPT
-      apt-get -y install postgresql-9.6 postgresql-client-9.6
-      su postgres -c 'echo vagrant | createuser vagrant --password'
-      su postgres -c 'createdb -O vagrant journal'
-      echo "listen_addresses=\'*\'" >> /etc/postgresql/9.6/main/postgresql.conf
-      echo "host all all 192.168.42.0/24 trust" >> /etc/postgresql/9.6/main/pg_hba.conf
-      service postgresql restart
-    SCRIPT
+    cfg.vm.network 'private_network', ip: DBMS_ADDRESS
+    cfg.vm.provision 'shell',
+      path: 'install-database',
+      privileged: true,
+      env: {
+        DB_NAME: DB_NAME,
+        DB_PASSWORD: DB_PASSWORD,
+        DB_USER: DB_USER,
+      }
+    cfg.vm.post_up_message = "The database is available at #{DB_URL}"
   end
 
-  (0..1).each do |index|
+  (0..(WEB_INSTANCE_COUNT - 1)).each do |index|
     config.vm.define "web#{index}" do |cfg|
       cfg.vm.hostname = "web#{index}"
       cfg.vm.network 'private_network', ip: "192.168.42.#{20 + index}"
-      cfg.vm.provision 'shell', privileged: false, inline: <<~SCRIPT
-        # Install Ruby
-        sudo apt-get install -y ruby ruby-dev build-essential libpq-dev git
-        sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'
-        sudo gem update --system
-        sudo gem install bundler
-
-        # Deploy the app
-        git clone https://github.com/uhlig-it/journal.git
-        cd journal
-        bundle install --without development
-        DB=postgres://vagrant:vagrant@192.168.42.30/journal rake db:migrate
-
-        # Register the app with systemd
-        sudo cp /vagrant/etc/journal.service /etc/systemd/system/
-        sudo systemctl enable journal
-        sudo systemctl start journal
-      SCRIPT
+      cfg.vm.provision 'shell',
+        path: 'deploy-app',
+        privileged: false,
+        env: {
+          DB_URL: DB_URL,
+        }
+      cfg.vm.post_up_message = "Application server #{cfg.vm.hostname} is available."
     end
   end
 
   config.vm.define 'lb' do |cfg|
     cfg.vm.hostname = 'lb'
-    cfg.vm.network 'private_network', ip: '192.168.42.2'
+    cfg.vm.network 'private_network', ip: ENTRY_POINT
     cfg.vm.provision 'shell', inline: <<~SCRIPT
       apt-get -y install curl haproxy
       cp /vagrant/etc/haproxy.cfg /etc/haproxy/haproxy.cfg
       service haproxy reload
     SCRIPT
+    cfg.vm.post_up_message = "The load balancer is available at http://#{ENTRY_POINT}"
   end
 end

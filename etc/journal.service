@@ -3,7 +3,7 @@ Description=Journal Server
 After=network.target
 
 [Service]
-Environment=DB=postgres://vagrant:vagrant@192.168.42.30/journal
+Environment=DB=${DB}
 Environment=PORT=4567
 WorkingDirectory=/home/vagrant/journal
 ExecStart=/usr/local/bin/bundle exec ruby app.rb -o 0.0.0.0

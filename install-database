@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+apt-get -y install postgresql-9.6 postgresql-client-9.6
+su postgres -c "echo $DB_PASSWORD | createuser $DB_USER --password"
+su postgres -c "createdb -O $DB_USER $DB_NAME"
+echo "listen_addresses='*'" >> /etc/postgresql/9.6/main/postgresql.conf
+echo "host all all 192.168.42.0/24 trust" >> /etc/postgresql/9.6/main/pg_hba.conf
+service postgresql restart

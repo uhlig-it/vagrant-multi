@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# Install Ruby
+sudo apt-get install -y ruby ruby-dev build-essential libpq-dev git
+sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'
+sudo gem update --system
+sudo gem install bundler
+
+# Get the app's source code
+# TODO At this point we are using the latest code of the master branch.
+# We should actually checkout a specific branch or tag in order to get
+# reproducability.
+git clone https://github.com/uhlig-it/journal.git
+cd journal
+
+# Install dependencies
+bundle install --without development
+
+# Migrate database to latest schema version
+DB=$DB_URL rake db:migrate
+
+# Register the app with systemd
+sudo sh -c "DB=$DB_URL envsubst < /vagrant/etc/journal.service > /etc/systemd/system/journal.service"
+sudo systemctl enable journal
+
+# Start the app right away
+sudo systemctl start journal
