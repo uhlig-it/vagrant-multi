@@ -3,6 +3,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt-get -y install postgresql-9.6 postgresql-client-9.6
 su postgres -c "echo $DB_PASSWORD | createuser $DB_USER --password"
 su postgres -c "createdb -O $DB_USER $DB_NAME"

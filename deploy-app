@@ -3,6 +3,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+export DEBIAN_FRONTEND=noninteractive
+
 # Install Ruby
 sudo apt-get install -y ruby ruby-dev build-essential libpq-dev git
 sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'

@@ -42,6 +42,7 @@ Vagrant.configure('2') do |config|
     cfg.vm.hostname = 'lb'
     cfg.vm.network 'private_network', ip: ENTRY_POINT
     cfg.vm.provision 'shell', inline: <<~SCRIPT
+      export DEBIAN_FRONTEND=noninteractive
       apt-get -y install curl haproxy
       cp /vagrant/etc/haproxy.cfg /etc/haproxy/haproxy.cfg
       service haproxy reload
