@@ -7,7 +7,7 @@ DB_PASSWORD = 'UmpBrgnyOCUOAq9B'
 DB_URL = "postgres://#{DB_USER}:#{DB_PASSWORD}@#{DBMS_ADDRESS}/#{DB_NAME}"
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'debian/stretch64'
+  config.vm.box = 'ubuntu/bionic64'
   config.vm.provision 'shell', inline: 'ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime'
 
   config.vm.define 'db' do |cfg|
