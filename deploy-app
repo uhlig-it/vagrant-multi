@@ -4,6 +4,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 export DEBIAN_FRONTEND=noninteractive
+export RACK_ENV=production
 
 # Install Ruby
 sudo apt-get install -y ruby ruby-dev build-essential libpq-dev git
