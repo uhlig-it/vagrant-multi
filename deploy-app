@@ -12,9 +12,10 @@ sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'
 sudo gem update --system
 sudo gem install bundler
 
-# Get the app's source code @master.
+# Get or update the app's source code @master.
 # You should actually checkout a specific branch or tag in order to get reproducibility.
-git clone https://github.com/uhlig-it/journal.git
+git clone https://github.com/uhlig-it/journal.git 2> /dev/null || git -C journal pull
+
 cd journal
 
 # Install dependencies
@@ -28,4 +29,4 @@ sudo sh -c "DB=$DB_URL envsubst < /vagrant/etc/journal.service > /etc/systemd/sy
 sudo systemctl enable journal
 
 # Start the app right away
-sudo systemctl start journal
+sudo systemctl restart journal
