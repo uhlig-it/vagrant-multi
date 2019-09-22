@@ -11,10 +11,8 @@ sudo sh -c 'echo "gem: --no-document" > /etc/gemrc'
 sudo gem update --system
 sudo gem install bundler
 
-# Get the app's source code
-# TODO At this point we are using the latest code of the master branch.
-# We should actually checkout a specific branch or tag in order to get
-# reproducability.
+# Get the app's source code @master.
+# You should actually checkout a specific branch or tag in order to get reproducibility.
 git clone https://github.com/uhlig-it/journal.git
 cd journal
 
