@@ -23,6 +23,6 @@ backend web_server
   balance roundrobin
   option httpchk GET /
 
-  # TODO Have these lines generated from the Vagrantfile, or a provisioner
-  server web0 192.168.42.20:4567 check
-  server web1 192.168.42.21:4567 check
+<% web_servers.each do |name, ip| %>
+  server <%= name %> <%= ip %>:4567 check
+<% end %>
