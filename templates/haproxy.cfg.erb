@@ -23,6 +23,6 @@ backend web_server
   balance roundrobin
   option httpchk GET /
 
-<% web_servers.each do |name, ip| %>
-  server <%= name %> <%= ip %>:4567 check
+<% WEB_SERVERS.each do |server| %>
+  server <%= server.name %> <%= server.ip %>:4567 check
 <% end %>
