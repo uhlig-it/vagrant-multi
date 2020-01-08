@@ -3,14 +3,17 @@ $LOAD_PATH.unshift File.expand_path('lib', __dir__)
 require 'vagrant-multi/web_server'
 require 'erb'
 
-NETWORK = IPAddr.new('192.168.42.0').mask(24)
+APP_PORT = 45678
+NETWORK_MASK = 24
+NETWORK = IPAddr.new('192.168.42.0').mask(NETWORK_MASK)
 ENTRY_POINT = NETWORK | IPAddr.new('0.0.0.2')
-WEB_SERVERS = VagrantMulti::WebServer.all(count: 3, network: NETWORK, offset: 20)
+WEB_SERVERS = VagrantMulti::WebServer.all(count: 3, network: NETWORK, offset: 20, port: APP_PORT)
 DB_HOST = NETWORK | IPAddr.new('0.0.0.3')
 DB_NAME = 'journaldb'
 DB_USER = 'journal-web'
 DB_PASSWORD = 'UmpBrgnyOCUOAq9B'
 DB_URL = "postgres://#{DB_USER}:#{DB_PASSWORD}@#{DB_HOST}/#{DB_NAME}"
+COMMITTISH='master'
 
 def generate_haproxy_config(b = binding)
   ERB.new(File.read(File.join(__dir__, 'templates', 'haproxy.cfg.erb')), 0, "%<>").result(b)
@@ -24,12 +27,13 @@ Vagrant.configure('2') do |config|
     cfg.vm.hostname = 'db'
     cfg.vm.network 'private_network', ip: DB_HOST.to_s
     cfg.vm.provision 'shell',
-      path: 'install-database',
+      path: 'provisioning/install-database',
       privileged: true,
       env: {
         DB_NAME: DB_NAME,
         DB_PASSWORD: DB_PASSWORD,
         DB_USER: DB_USER,
+        TRUSTED_NETWORK: "#{NETWORK}/#{NETWORK_MASK}"
       }
     cfg.vm.post_up_message = "The database is available at #{DB_URL}"
   end
@@ -39,12 +43,14 @@ Vagrant.configure('2') do |config|
       cfg.vm.hostname = server.name
       cfg.vm.network 'private_network', ip: server.ip.to_s
       cfg.vm.provision 'shell',
-        path: 'deploy-app',
+        path: 'provisioning/deploy-app',
         privileged: false,
         env: {
+          APP_PORT: APP_PORT,
           DB_URL: DB_URL,
+          COMMITTISH: COMMITTISH,
         }
-      cfg.vm.post_up_message = "Application server #{cfg.vm.hostname} is available."
+      cfg.vm.post_up_message = "Application server #{cfg.vm.hostname} is available at #{server.url}."
     end
   end
 

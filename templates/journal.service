@@ -3,8 +3,8 @@ Description=Journal Server
 After=network.target
 
 [Service]
-Environment=DB=${DB}
-Environment=PORT=4567
+Environment=DB=${DB_URL}
+Environment=PORT=${APP_PORT}
 Environment=RACK_ENV=production
 WorkingDirectory=/home/vagrant/journal
 ExecStart=/usr/local/bin/bundle exec ruby app.rb -o 0.0.0.0

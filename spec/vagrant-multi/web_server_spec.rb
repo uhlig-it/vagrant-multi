@@ -6,8 +6,9 @@ require 'vagrant-multi/web_server'
 module VagrantMulti
   describe WebServer do
     let(:network) { IPAddr.new('192.168.11.0').mask(24) }
+
     subject(:all) do
-      described_class.all(count: 42, network: network, offset: 11)
+      described_class.all(count: 42, network: network, offset: 11, port: 1234)
     end
 
     it 'lists all web servers' do
@@ -31,6 +32,10 @@ module VagrantMulti
       expect(all[1].ip).to eq(IPAddr.new('192.168.11.12'))
       # ...
       expect(all[41].ip).to eq(IPAddr.new('192.168.11.52'))
+    end
+
+    it 'has the desired port' do
+      expect(all[1].port).to eq(1234)
     end
   end
 end

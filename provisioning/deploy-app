@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+export DEBIAN_FRONTEND=noninteractive
+export RACK_ENV=production
+
+main() {
+  install-ruby
+  fetch-app
+  install-app-dependencies
+  migrate-database
+  register-app
+  start-app
+}
+
+install-ruby() {
+  sudo --shell -- << '  EOC'
+    apt-get --yes update
+    apt-get --yes install ruby ruby-dev build-essential libpq-dev git
+    echo "gem: --no-document" > /etc/gemrc
+    gem update --system
+    gem install bundler
+  EOC
+}
+
+fetch-app() {
+  if [ ! -d journal ]; then
+    git clone https://github.com/uhlig-it/journal.git
+    cd journal
+  else
+    cd journal
+    git checkout master
+    git pull
+  fi
+
+  git checkout "${COMMITTISH:-master}"
+}
+
+install-app-dependencies() {
+  bundle config set without development
+  bundle install
+}
+
+migrate-database() {
+  DB="$DB_URL" rake db:migrate
+}
+
+register-app() {
+  sudo --shell --preserve-env=DB_URL,APP_PORT -- << '  EOC'
+    DB_URL="$DB_URL" APP_PORT="$APP_PORT" envsubst < /vagrant/templates/journal.service > /etc/systemd/system/journal.service
+    systemctl enable journal
+  EOC
+}
+
+start-app() {
+  sudo systemctl restart journal
+}
+
+main "$@"
