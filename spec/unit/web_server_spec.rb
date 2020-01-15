@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require_relative 'helper'
 require 'vagrant-multi/web_server'
 
 module VagrantMulti

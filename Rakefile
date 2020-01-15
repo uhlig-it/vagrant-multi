@@ -2,11 +2,18 @@
 
 require 'rspec/core/rake_task'
 
-RSpec::Core::RakeTask.new
+namespace :spec do
+  desc "System test"
+  task :system do
+    sh 'vagrant validate'
+  end
 
-desc "System test"
-task :system do
-  sh 'vagrant validate'
+  %w[unit acceptance].each do |type|
+     desc "Run #{type} tests"
+     RSpec::Core::RakeTask.new(type) do |t|
+       t.pattern = "spec/#{type}/**/*_spec.rb"
+     end
+  end
 end
 
-task :default => :spec
+task default: ['spec:unit', 'spec:system', 'spec:acceptance']

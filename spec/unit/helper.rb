@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# $LOAD_PATH.unshift
-warn File.expand_path('../lib', __dir__)
+File.expand_path('../lib', __dir__)
 
 RSpec.configure do |config|
   config.filter_run :focus
