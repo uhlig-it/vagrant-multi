@@ -20,7 +20,7 @@ def generate_haproxy_config(b = binding)
 end
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'ubuntu/bionic64'
+  config.vm.box = 'ubuntu/focal64'
   config.vm.provision 'shell', inline: 'ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime'
 
   config.vm.define 'db' do |cfg|
