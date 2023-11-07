@@ -39,6 +39,7 @@ fetch-app() {
 
 install-app-dependencies() {
   bundle config set without development
+  bundle config set --local path ~/.gem
   bundle install
 }
 
