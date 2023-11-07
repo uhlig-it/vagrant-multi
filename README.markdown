@@ -6,7 +6,7 @@ This project deploys a simple journal app. After deployment with `vagrant up`, i
 
 ## Start
 
-`vagrant up`
+`vagrant up --provider vmware_desktop`
 
 The app will be available at [http://192.168.42.2/](http://192.168.42.2/).
 
