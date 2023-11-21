@@ -2,6 +2,8 @@
 
 This project deploys a simple journal app. After deployment with `vagrant up`, it will be available on [http://192.168.42.2/](http://192.168.42.2/).
 
+![](arch.svg)
+
 # Development
 
 ## Start
